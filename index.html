@@ -1,0 +1,65 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
+<html>
+    <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+        <title>Signature Generator</title>
+        
+        <!-- jQuery Library-->
+  	<script src="http://ajax.googleapis.com/ajax/libs/jquery/1.8.0/jquery.min.js"></script>
+        <!--Signature & AES Libraries-->        
+		<script type="text/javascript" language="javascript" src="Library/sha256.min.js"></script>                
+        <script type="text/javascript" language="javascript" src="Library/pidcrypt.js"></script>
+        <script type="text/javascript" language="javascript" src="Library/pidcrypt_util.js"></script>
+        <script type="text/javascript" language="javascript" src="Library/md5.js"></script><!--needed for key and iv generation-->
+        <script type="text/javascript" language="javascript" src="Library/aes_core.js"></script><!--needed block en-/decryption-->
+        <script type="text/javascript" language="javascript" src="Library/aes_cbc.js"></script><!--needed for cbc mode-->		
+        
+        <!--Local Scripts-->
+        <script type="text/javascript" language="javascript" src="Signature.js"></script>
+                
+    </head>
+    <body>
+        <h1>Signature Generator</h1>
+        <p>This Tool generates signatures for any string such as a URL, sensitive data, etc. I'm using the SHA-256 Hash Algorithm for this demo, but you can use AES, MD5 etc too. The signature computed is based on the concatenation of the query string params. But that is easily modifiable to suit your need.</p>
+        <div>
+            Query URL: <input id='raw_url' type='text' size='200'><br/>
+            Key: <input id='key' type='text' size='100'><br/>
+            <button id='generate'>&nbsp;Generate Signature&nbsp;</button>
+        </div>
+        <br/><br/>
+        <div>
+            Signature:&nbsp;<span id='gen_signature'></span><br/>
+            Regenerated URL With Signature:&nbsp;<span id='response_url'></span>
+        </div>
+        
+        <script type="text/javascript" language="javascript">
+            //http://api.yoursite.com/?req_type=get_info&id=12345
+            
+            function getUrlVars(url)
+            {
+                var map = {};
+                var parts = url.replace(/[?&]+([^=&]+)=([^&]*)/gi, function(m,key,value) {
+                    map[key] = value;
+                });
+                return map; 
+            }
+            
+            $('#generate').click(function() {
+                var raw_url = $('#raw_url').val();
+                var query_vars = getUrlVars(raw_url);
+                var input_text = '';
+                for(x in query_vars){                    
+                    input_text += query_vars[x]
+                }
+                
+                var key = $('#key').val();                
+                var signature = Signature.calcHMAC(input_text, "ASCII", key, "ASCII");
+                $('#gen_signature').html(signature);
+                var response_url = raw_url + '&signature='+signature;
+                $('#response_url').html(response_url);
+                
+            });
+        </script>
+        
+    </body>
+</html>
